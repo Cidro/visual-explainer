@@ -19,12 +19,14 @@ fi
 
 # Copy skill
 echo "Installing skill to $SKILL_DIR..."
+mkdir -p "$(dirname "$SKILL_DIR")"
 rm -rf "$SKILL_DIR"
 cp -r plugins/visual-explainer "$SKILL_DIR"
 
 # Copy prompts (slash commands)
 echo "Installing prompts to $PROMPTS_DIR..."
 mkdir -p "$PROMPTS_DIR"
+rm -f "$PROMPTS_DIR"/s[h]are*.md
 cp "$SKILL_DIR/commands/"*.md "$PROMPTS_DIR/"
 
 # Cleanup if we cloned
@@ -38,4 +40,5 @@ echo ""
 echo "Commands available:"
 echo "  /diff-review, /plan-review, /project-recap, /fact-check"
 echo "  /generate-web-diagram, /generate-slides, /generate-visual-plan"
-echo "  /share-page"
+echo ""
+echo "Note: this legacy installer copies only skills and prompts. Use 'pi install' for the native Pi tool."

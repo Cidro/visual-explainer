@@ -31,7 +31,7 @@ This skill fixes that. Real typography, dark/light themes, interactive Mermaid d
 | Harness | Support | Install path / behavior |
 |---|---|---|
 | Claude Code | Marketplace plugin | Preserved marketplace shape with source at `plugins/visual-explainer/` |
-| Pi | Package metadata plus installer | `package.json` advertises the skill and prompts; `install-pi.sh` installs to `~/.pi/agent/skills/visual-explainer` and `~/.pi/agent/prompts/` |
+| Pi | Package metadata plus installer | `package.json` advertises the skill, prompts, and native `visual_explainer` tool with `prepare` and `render` actions; `install-pi.sh` installs copied skill/prompt resources for legacy manual installs |
 | Codex CLI | Native skill path plus optional prompts | Copy to `~/.codex/skills/visual-explainer`; optional prompts go in `~/.codex/prompts/` if your Codex build supports them |
 | OpenCode/opencode | Observed skill/command paths | Copy to `~/.config/opencode/skill/visual-explainer`; optional commands go in `~/.config/opencode/command/` |
 | Cursor | Rules-based guidance | Add the supplied `.mdc` rule; Cursor is not treated as native Agent Skills support |
@@ -56,23 +56,27 @@ git clone --depth 1 https://github.com/nicobailon/visual-explainer.git
 pi install ./visual-explainer
 ```
 
-The package manifest advertises the canonical skill and command templates:
+The package manifest advertises the canonical skill, command templates, and Pi tool:
 
 ```json
 "pi": {
+  "extensions": ["./plugins/visual-explainer/extension.ts"],
   "skills": ["./plugins/visual-explainer"],
   "prompts": ["./plugins/visual-explainer/commands"]
 }
 ```
 
+The Pi extension registers one native `visual_explainer` tool. Use `action: "prepare"` to plan a visual explanation after generating or reviewing a substantial plan, architecture, diff, or implementation, and `action: "render"` to write complete HTML pages to `~/.agent/diagrams/`. `/generate-web-diagram` remains the bundled prompt template command.
+
 If you previously used the old curl/manual installer, remove those copied files before using `pi install`; otherwise Pi will report skill and prompt conflicts because the user-level copies shadow the package resources:
 
 ```bash
 rm -rf ~/.pi/agent/skills/visual-explainer
-rm -f ~/.pi/agent/prompts/{diff-review,fact-check,generate-slides,generate-visual-plan,generate-web-diagram,plan-review,project-recap,share-page}.md
+rm -f ~/.pi/agent/prompts/{diff-review,fact-check,generate-slides,generate-visual-plan,generate-web-diagram,plan-review,project-recap}.md
+rm -f ~/.pi/agent/prompts/s[h]are*.md
 ```
 
-The legacy installer still works if you prefer copied files over package management:
+The legacy installer still works if you prefer copied skill and prompt files over package management, but it does not install the native Pi tool:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/nicobailon/visual-explainer/main/install-pi.sh | bash
@@ -127,7 +131,6 @@ Use `configs/openclaw/AGENTS.md` as lightweight project guidance and copy or ref
 | `/plan-review` | Compare a plan against the codebase with risk assessment |
 | `/project-recap` | Mental model snapshot for context-switching back to a project |
 | `/fact-check` | Verify accuracy of a document against actual code |
-| `/share-page` | Deploy an HTML page to Vercel and get a live URL |
 
 The agent also kicks in automatically when it's about to dump a complex table in the terminal (4+ rows or 3+ columns) — it renders HTML instead.
 
@@ -153,22 +156,21 @@ plugins/
     ├── .claude-plugin/
     │   └── plugin.json   ← plugin manifest
     ├── SKILL.md           ← workflow + design principles
+    ├── extension.ts       ← Pi native tool
     ├── commands/          ← slash commands
     ├── references/        ← agent reads before generating
     │   ├── css-patterns.md   (layouts, animations, theming)
     │   ├── libraries.md      (Mermaid, Chart.js, fonts)
     │   ├── responsive-nav.md (sticky TOC for multi-section pages)
     │   └── slide-patterns.md (slide engine, transitions, presets)
-    ├── templates/         ← reference templates with different palettes
-    │   ├── architecture.html
-    │   ├── mermaid-flowchart.html
-    │   ├── data-table.html
-    │   └── slide-deck.html
-    └── scripts/
-        └── share.sh       ← deploy HTML to Vercel for sharing
+    └── templates/         ← reference templates with different palettes
+        ├── architecture.html
+        ├── mermaid-flowchart.html
+        ├── data-table.html
+        └── slide-deck.html
 ```
 
-**Output:** `~/.agent/diagrams/filename.html` → opens in browser
+**Output:** `~/.agent/diagrams/filename.html` → opens in browser. In Pi package installs, agents can offer `visual_explainer` with `action: "prepare"` after generating or reviewing a substantial plan, architecture, diff, or implementation when a visual explanation would help, then call it with `action: "render"` as the final write/open step.
 
 The skill routes to the right approach automatically: Mermaid for flowcharts and diagrams, CSS Grid for architecture overviews, HTML tables for data, Chart.js for dashboards.
 
@@ -177,7 +179,6 @@ The skill routes to the right approach automatically: Mermaid for flowcharts and
 - Generated HTML is portable and self-contained, but auto-opening depends on the harness, browser access, and sandbox rules.
 - All harnesses write visual output to `~/.agent/diagrams/` unless the user asks for a different path.
 - Switching OS theme requires a page refresh for Mermaid SVGs.
-- `/share-page` uses `plugins/visual-explainer/scripts/share.sh`, which expects a Pi-compatible `vercel-deploy` skill in a standard Pi skill location. Other harnesses can still generate and open pages, but sharing may need that dependency installed separately.
 - Results vary by model capability.
 
 ## Credits

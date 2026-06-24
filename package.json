@@ -33,11 +33,18 @@
     ".claude-plugin",
     "configs",
     "install-pi.sh",
+    "banner.png",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
   ],
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
   "pi": {
+    "extensions": [
+      "./plugins/visual-explainer/extension.ts"
+    ],
     "skills": [
       "./plugins/visual-explainer"
     ],

@@ -16,7 +16,7 @@ Generate self-contained HTML files for technical diagrams, visualizations, and d
 
 ## Available Commands
 
-Detailed prompt templates in `./commands/`. In Pi, these are slash commands (`/diff-review`). In Claude Code, namespaced (`/visual-explainer:diff-review`). In Codex, use `/prompts:diff-review` (if installed to `~/.codex/prompts/`) or invoke `$visual-explainer` and describe the workflow.
+Detailed prompt templates live in `./commands/`. In Pi, these are slash commands (`/diff-review`). Pi package installs also provide the `visual_explainer` tool for planning visual explanations with `action: "prepare"` and writing complete HTML to `~/.agent/diagrams/` with `action: "render"`. In Claude Code, commands are namespaced (`/visual-explainer:diff-review`). In Codex, use `/prompts:diff-review` (if installed to `~/.codex/prompts/`) or invoke `$visual-explainer` and describe the workflow.
 
 | Command | What it does |
 |---------|-------------|
@@ -27,7 +27,6 @@ Detailed prompt templates in `./commands/`. In Pi, these are slash commands (`/d
 | `plan-review` | Compare a plan against the codebase with risk assessment |
 | `project-recap` | Mental model snapshot for context-switching back to a project |
 | `fact-check` | Verify accuracy of a document against actual code |
-| `share-page` | Deploy an HTML page to Vercel and get a live URL |
 
 ## Workflow
 
@@ -197,7 +196,7 @@ Keep animations purposeful: entrance reveals, hover feedback, and user-initiated
 - macOS: `open ~/.agent/diagrams/filename.html`
 - Linux: `xdg-open ~/.agent/diagrams/filename.html`
 
-**Tell the user** the file path so they can re-open or share it.
+**In Pi package installs, consider offering a visual explanation after generating or reviewing a plan, architecture, diff, or substantial implementation.** Because this can consume many tokens, ask before calling `visual_explainer` with `action: "prepare"` unless the user explicitly requested a diagram, visual review, recap, or visual plan. Use `visual_explainer` with `action: "render"` as the final step: pass a basename-style filename and the complete HTML document; the tool writes under `~/.agent/diagrams/` and opens the page. Otherwise, write the file yourself and open it with `open` or `xdg-open`. Tell the user the file path so they can re-open it.
 
 ## Diagram Types
 
@@ -358,44 +357,6 @@ Every diagram is a single self-contained `.html` file. No external assets except
 </body>
 </html>
 ```
-
-## Sharing Pages
-
-Share visual explainer pages instantly via Vercel when a Pi-compatible `vercel-deploy` skill is available. No account or authentication required.
-
-**Usage with the installed skill path:**
-```bash
-bash ~/.pi/agent/skills/visual-explainer/scripts/share.sh <html-file>
-```
-
-If the skill lives somewhere else, use that install path instead, such as `~/.codex/skills/visual-explainer/scripts/share.sh`, `~/.config/opencode/skill/visual-explainer/scripts/share.sh`, or `./plugins/visual-explainer/scripts/share.sh` from a repository checkout.
-
-**Example:**
-```bash
-bash ~/.pi/agent/skills/visual-explainer/scripts/share.sh ~/.agent/diagrams/my-diagram.html
-
-# Output:
-# ✓ Shared successfully!
-# Live URL:  https://skill-deploy-abc123.vercel.app
-# Claim URL: https://vercel.com/claim-deployment?code=...
-```
-
-**How it works:**
-1. Runs the `share.sh` script from the installed `visual-explainer` skill directory
-2. Copies HTML file to temp directory as `index.html`
-3. Deploys via the Pi-compatible `vercel-deploy` skill
-4. URL is live immediately — works in any browser
-
-**Requirements:**
-- vercel-deploy skill in a standard Pi-compatible skill location (in Pi: `pi install npm:vercel-deploy`)
-
-**Notes:**
-- Deployments are public — anyone with the URL can view
-- Preview deployments have configurable retention (default: 30 days)
-- Claim URL lets you transfer the deployment to your Vercel account
-- Other harnesses can generate and open HTML normally; `/share-page` depends on the Pi-compatible `vercel-deploy` script being available
-
-See `./commands/share-page.md` for the `/share-page` command template.
 
 ## Quality Checks
 

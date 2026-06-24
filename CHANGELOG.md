@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Added one Pi extension tool, `visual_explainer`, with `prepare` for permission-aware visual explanation planning and optional subagent scouting, plus `render` for writing and opening generated HTML pages while keeping `/generate-web-diagram` as a prompt template.
+
 ## [0.7.1] - 2026-04-27
 
 ### Compatibility
@@ -9,8 +14,6 @@
 - Documented migration cleanup for older manual Pi installs, which can otherwise shadow package resources with copied user-level skill and prompt files.
 
 ### Changed
-- Completed the hard cutover from `/share` to `/share-page` by removing the deprecated command template and updating docs and installer output.
-- Removed `{{skill_dir}}` placeholders from canonical skill docs; share instructions now resolve `share.sh` from the installed `visual-explainer` skill directory.
 - Made `pi install` the primary Pi installation path while keeping the legacy installer documented as an explicit copied-file alternative.
 
 ## [0.6.3] - 2026-03-09
@@ -97,18 +100,10 @@ Based on PR #25 by [@peak-flow](https://github.com/peak-flow), with additional m
 - Added install instructions for OpenAI Codex to README
 - Uses `~/.agents/skills` and `~/.agents/commands` paths
 
-### Share Command
-- New `/share` prompt and `scripts/share.sh` for instant sharing of visual explainer pages
-- Uses vercel-deploy skill — no account or authentication required
-- Zero-friction: just `bash scripts/share.sh mypage.html` → live URL in seconds
-- Returns claimable deployment (can transfer to your Vercel account later)
-- JSON output for programmatic use
-
 ### Bug Fixes
 - Fixed pi skill loading: scoped `pi.skills` to `./SKILL.md` instead of `./` (was trying to load README.md and CHANGELOG.md as skills)
 - Fixed Mermaid line breaks: use `<br/>` instead of `\n` in flowchart labels (renders as literal text otherwise)
 - Fixed `mermaid-flowchart.html` to match documented pattern: moved flex centering from `.mermaid-wrap .mermaid` to `.mermaid-wrap`, added `min-height: 400px`
-- Fixed `share.sh` to properly capture and display deployment errors (was silently exiting due to `set -e`)
 
 ## [0.4.5] - 2026-03-04
 
