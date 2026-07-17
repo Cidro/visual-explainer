@@ -212,15 +212,15 @@ function prepareVisualExplanation(pi: ExtensionAPI, params: VisualExplainerParam
   const subagent = detectSubagent(pi);
   const shouldUseSubagent = params.preferSubagent !== false && subagent.available;
   const subagentPrompt = shouldUseSubagent
-    ? `Scout the codebase for a visual explanation about ${topic}.${goal ? ` The user goal is: ${goal}.` : ""}${files.length ? ` Start with these files/paths: ${files.join(", ")}.` : ""} Return concise findings, important entities/flows, and visual structure recommendations. Do not edit files.`
+    ? `Generate only the complete self-contained HTML document for a visual explanation about ${topic}.${goal ? ` The user goal is: ${goal}.` : ""}${files.length ? ` Use the gathered context from these files/paths: ${files.join(", ")}.` : ""} Return the HTML inline with no Markdown fence or acceptance report. Do not write files.`
     : undefined;
   const recommendedFlow = shouldUseSubagent
     ? [
-        "Run a scout subagent to gather repo context and identify the visual structure.",
+        "Gather the needed repo context directly in the main agent.",
         "Synthesize the findings into a concise visual outline for the target audience.",
-        "Read the relevant visual-explainer references or templates before generating the page.",
-        "Generate a complete self-contained HTML document using the visual-explainer skill.",
-        "Choose a basename filename and call visual_explainer with action=render, filename, html, and optional open.",
+        "Read the relevant visual-explainer references or templates.",
+        "Run the delegate subagent with acceptance=false, inline output, and no restrictive tool budget to generate only the complete HTML document.",
+        "Call visual_explainer with action=render, filename, the returned html, and optional open.",
       ]
     : [
         "Gather the needed context directly in the main agent.",
@@ -234,7 +234,7 @@ function prepareVisualExplanation(pi: ExtensionAPI, params: VisualExplainerParam
     `Prepared visual explanation for: ${topic}`,
     goal ? `Goal: ${goal}` : undefined,
     audience ? `Audience: ${audience}` : undefined,
-    shouldUseSubagent ? "Recommended start: use a scout subagent for context." : "Recommended start: gather context directly in this session.",
+    shouldUseSubagent ? "Recommended generation: use the delegate subagent after gathering context." : "Recommended start: gather context directly in this session.",
     "Recommended flow:",
     ...recommendedFlow.map((step, i) => `${i + 1}. ${step}`),
     subagentPrompt ? `Suggested subagent task:\n${subagentPrompt}` : undefined,
@@ -308,7 +308,7 @@ export default function (pi: ExtensionAPI) {
     promptGuidelines: [
       "After generating or reviewing a plan, architecture, diff, or substantial implementation, consider offering a visual explanation if it would clarify the work for the user.",
       "Because visual explanations can consume many tokens, ask before calling visual_explainer with action=prepare unless the user explicitly requested a diagram, visual review, recap, or visual plan.",
-      "If visual_explainer action=prepare recommends subagent scouting and the subagent tool is available, gather context first, then synthesize complete HTML and finish with visual_explainer action=render.",
+      "When visual_explainer action=prepare recommends delegation, gather context first, then run the delegate with acceptance=false and inline output (no output path or restrictive tool budget); pass its complete HTML to visual_explainer action=render.",
       "Use visual_explainer action=render only after generating a complete visual-explainer HTML document; pass a basename-style filename because it writes under ~/.agent/diagrams/.",
     ],
     parameters: visualExplainerParameters,
