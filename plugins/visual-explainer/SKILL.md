@@ -17,13 +17,16 @@ Generate self-contained HTML pages that explain systems, code changes, plans, da
 - Prefer an HTML page over terminal ASCII when the output is inherently visual.
 - If a table would have 4+ rows or 3+ columns, render it as HTML and give only a short chat summary.
 - Write files to `~/.agent/diagrams/` or the explicit eval output path. Use descriptive filenames.
-- Open generated pages in the browser when running normally. In Pi package installs, use `visual_explainer` with `prepare` for planning/context and `render` only after the complete HTML document exists.
-- When the `delegate` subagent is available, use its configured lower-cost model to generate the complete HTML; keep context gathering and final rendering in the main agent. Invoke it with `acceptance: false`, request HTML inline (no subagent output path), and do not impose a restrictive tool budget. This prevents implementation acceptance contracts from conflicting with HTML-only output.
-- The final page must be a complete self-contained HTML document, including embedded CSS and any needed JS.
+- Open generated pages in the browser when running normally. In Pi package installs, prefer `visual_explainer` lean rendering with `title`, freeform `bodyHtml`, and optional minimal `customCss`; the extension supplies the complete document and Mermaid runtime.
+- Keep page composition flexible: the model may generate any semantic HTML structure, including sections, cards, timelines, tables, details, and diagrams. Do not force content into a fixed schema.
+- Use `<pre class="mermaid">...</pre>` for diagrams. Do not generate Mermaid imports, initialization, zoom controls, or document boilerplate in lean mode.
+- When the `delegate` subagent is available, use its configured lower-cost model to generate only `bodyHtml` and optional `customCss`; keep context gathering and final rendering in the main agent. Invoke it with `acceptance: false`, request output inline, and do not impose a restrictive tool budget.
+- Before editing a lean page, call `visual_explainer` with `action=source` and its basename; revise the returned source and render again instead of reading the complete generated document.
+- Use legacy complete-HTML rendering only for slide decks or when the lean shell cannot support an explicitly requested interaction.
 
 ## Reference routing
 
-Read only the references needed for the current output:
+Lean pages usually need no reference: use semantic HTML, Mermaid blocks, and minimal page-specific CSS. Read only a reference needed for a specialized composition:
 
 | Need | Read |
 |---|---|
@@ -50,15 +53,11 @@ Read only the references needed for the current output:
 
 ## Mermaid invariants
 
-- Use `theme: 'base'` with custom `themeVariables` matching the page palette.
-- For complex diagrams use ELK layout when available.
-- Never use bare `<pre class="mermaid">`.
-- Use the canonical `diagram-shell` pattern from `templates/mermaid-flowchart.html`: `.diagram-shell` > `.mermaid-wrap` > `.zoom-controls` + `.mermaid-viewport` > `.mermaid-canvas`.
-- Every Mermaid diagram needs zoom in/out/reset/expand controls, Ctrl/Cmd+scroll zoom, drag panning, and click-to-expand.
+- In lean mode, emit bare `<pre class="mermaid">` source blocks; the extension initializes Mermaid 11 with a responsive base theme.
 - Prefer `flowchart TD` for complex diagrams. Use `LR` only for simple 3–4 node linear flows.
 - Use `<br/>` in quoted flowchart labels. Do not use escaped `\n` labels.
 - Never define page-level `.node`; Mermaid uses it internally. Use namespaced page classes such as `.ve-card`.
-- For 15+ elements, do not cram everything into one Mermaid diagram. Use the hybrid overview + cards pattern.
+- For 15+ elements, do not cram everything into one Mermaid diagram. Use a small overview plus semantic HTML detail cards.
 
 ## Layout and style invariants
 
@@ -92,13 +91,11 @@ If `surf` is available, generated images may be embedded as base64 for hero bann
 
 Before delivery, verify:
 
-- complete HTML document;
+- lean output uses `title` + freeform `bodyHtml` and only necessary `customCss`;
 - output written to the requested path;
 - no console errors when opened;
 - no horizontal overflow at normal desktop width;
-- fonts load with fallbacks;
 - tables preserve rows/columns and wrap long text;
-- Mermaid diagrams use `diagram-shell` with zoom/pan/expand;
-- slides fit one viewport, include carousel dots, and preserve source coverage;
-- visual hierarchy makes the main idea obvious in the first viewport;
-- styling would still be recognizable if compared against a generic dark/violet template.
+- Mermaid source is valid and uses `<pre class="mermaid">`;
+- slides use legacy complete-HTML mode, fit one viewport, include navigation, and preserve source coverage;
+- visual hierarchy makes the main idea obvious in the first viewport.
