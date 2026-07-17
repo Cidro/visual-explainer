@@ -18,6 +18,7 @@ Generate self-contained HTML pages that explain systems, code changes, plans, da
 - If a table would have 4+ rows or 3+ columns, render it as HTML and give only a short chat summary.
 - Write files to `~/.agent/diagrams/` or the explicit eval output path. Use descriptive filenames.
 - Open generated pages in the browser when running normally. In Pi package installs, use `visual_explainer` with `prepare` for planning/context and `render` only after the complete HTML document exists.
+- When the `delegate` subagent is available, use its configured lower-cost model to generate the complete HTML; keep context gathering and final rendering in the main agent.
 - The final page must be a complete self-contained HTML document, including embedded CSS and any needed JS.
 
 ## Reference routing
