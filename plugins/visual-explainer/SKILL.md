@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires a browser to view generated HTML files. Optional surf-cli for AI image generation.
 metadata:
   author: nicobailon
-  version: "0.8.2"
+  version: "0.8.3"
 ---
 
 # Visual Explainer
@@ -20,7 +20,7 @@ Generate self-contained HTML pages that explain systems, code changes, plans, da
 - Open generated pages in the browser when running normally. In Pi package installs, prefer `visual_explainer` lean rendering with `title`, freeform `bodyHtml`, and optional minimal `customCss`; the extension supplies the complete document and Mermaid runtime.
 - Keep page composition flexible: the model may generate any semantic HTML structure, including sections, cards, timelines, tables, details, and diagrams. Do not force content into a fixed schema.
 - Use `<pre class="mermaid">...</pre>` for diagrams. Do not generate Mermaid imports, initialization, zoom controls, or document boilerplate in lean mode.
-- When the `delegate` subagent is available, use its configured lower-cost model to generate only `bodyHtml` and optional `customCss`; keep context gathering and final rendering in the main agent. Invoke it with `acceptance: false`, request output inline, and do not impose a restrictive tool budget.
+- **Mandatory:** When the `delegate` subagent is available, you MUST use its configured lower-cost model to generate only `bodyHtml` and optional `customCss`. The main session MUST NOT generate or write the HTML; it may only gather context, invoke `delegate`, and pass the result to `visual_explainer.render`. Invoke `delegate` with `acceptance: false`, request output inline, and do not impose a restrictive tool budget. Generate HTML in the main session only when `delegate` is unavailable or fails, and tell the user when using that fallback.
 - Before editing a lean page, call `visual_explainer` with `action=source` and its basename; revise the returned source and render again instead of reading the complete generated document.
 - Use legacy complete-HTML rendering only for slide decks or when the lean shell cannot support an explicitly requested interaction.
 

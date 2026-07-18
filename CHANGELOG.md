@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [0.8.3] - 2026-07-17
+
+### Changed
+- Made lower-cost delegate generation mandatory for visual HTML when the delegate is available, with direct main-session generation retained only as an explicit fallback.
+
 ## [0.8.1] - 2026-06-25
 
 ### Fixed

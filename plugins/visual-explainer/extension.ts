@@ -305,8 +305,8 @@ function prepareVisualExplanation(pi: ExtensionAPI, params: VisualExplainerParam
         "Gather the needed repo context directly in the main agent.",
         "Synthesize the findings into a concise visual outline for the target audience.",
         "Read a visual-explainer reference only when the content needs a specialized pattern.",
-        "Run the delegate with acceptance=false and inline output to generate only freeform bodyHtml plus optional minimal customCss.",
-        "Call visual_explainer with action=render, filename, title, bodyHtml, customCss, and optional open.",
+        "MANDATORY: Run the delegate with acceptance=false and inline output to generate only freeform bodyHtml plus optional minimal customCss; the main session must not generate or write the HTML.",
+        "Call visual_explainer with action=render, filename, title, bodyHtml, customCss, and optional open. Generate HTML in the main session only if delegate fails, and tell the user when using that fallback.",
       ]
     : [
         "Gather the needed context directly in the main agent.",
@@ -320,7 +320,7 @@ function prepareVisualExplanation(pi: ExtensionAPI, params: VisualExplainerParam
     `Prepared visual explanation for: ${topic}`,
     goal ? `Goal: ${goal}` : undefined,
     audience ? `Audience: ${audience}` : undefined,
-    shouldUseSubagent ? "Recommended generation: use the delegate subagent after gathering context." : "Recommended start: gather context directly in this session.",
+    shouldUseSubagent ? "Mandatory generation: use the delegate subagent after gathering context; do not generate or write HTML in the main session." : "Delegate is unavailable; generate the HTML directly in this session and tell the user that the fallback is being used.",
     "Recommended flow:",
     ...recommendedFlow.map((step, i) => `${i + 1}. ${step}`),
     subagentPrompt ? `Suggested subagent task:\n${subagentPrompt}` : undefined,
